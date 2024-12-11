@@ -19,7 +19,7 @@
           collect (parse-integer y) into right
           finally (return (values left right)))))
 
-(defun solution-1 (input)
+(defun part-1 (input)
   (multiple-value-bind (left right) (split-input-into-two-lists input)
     (setf left (sort left #'<))
     (setf right (sort right #'<))
@@ -28,9 +28,9 @@
                  for y in right
                  collect (abs (- x y))))))
 
-(solution-1 (uiop:read-file-string "input"))
+(part-1 (uiop:read-file-string "input"))
 
-(defun solution-2 (input)
+(defun part-2 (input)
   (multiple-value-bind (left right) (split-input-into-two-lists input)
     (let (similarities)
       (apply #'+
@@ -44,4 +44,4 @@
                   (* x similarity-value)))
               left)))))
 
-(solution-2 (uiop:read-file-string "input"))
+(part-2 (uiop:read-file-string "input"))
