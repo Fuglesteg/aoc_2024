@@ -5,13 +5,6 @@
 3 9
 3 3")
 
-(defun string-empty-p (string)
-  (or (not (stringp string))
-      (string= string "")))
-
-(defun split-string-remove-empties (string &key separator)
-  (remove-if #'string-empty-p (uiop:split-string string :separator separator)))
-
 (defun split-input-into-two-lists (input)
   (let ((numbers (split-string-remove-empties input :separator '(#\Newline #\Space #\Tab))))
     (loop for (x y) on numbers by #'cddr
