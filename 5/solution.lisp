@@ -29,6 +29,7 @@
 97,13,75,29,47")
 
 (defun parse (input)
+  "Parse the input into a list of cons pairs of priorities and a list of updates"
   (let* ((section-separator (string-find input (coerce '(#\Newline #\Newline) 'string)))
          (first-section (subseq input 0 section-separator))
          (second-section (subseq input (+ 2 section-separator))))
@@ -40,23 +41,50 @@
 
 (parse *example*)
 
+(defun priorities-lookup (priorities)
+  (reduce (lambda (lookup value)
+            (let ((existing (assoc (car value) lookup)))
+              (if existing
+                  (setf (cdr existing) (append (list (cdr value)) (cdr existing)))
+                  (setf lookup (acons (car value) (list (cdr value)) lookup)))
+              lookup))
+          priorities
+          :initial-value '()))
+
+(defun update-acceptable-p (update priorities-lookup)
+  (loop for page in update
+        collect page into pages-so-far
+        when (let ((non-acceptable-previous-pages (cdr (assoc page priorities-lookup))))
+               (find-if (lambda (non-acceptable-page)
+                          (find non-acceptable-page pages-so-far))
+                        non-acceptable-previous-pages))
+        return nil
+        finally (return t)))
+
+(defun middle (sequence)
+  (elt sequence (floor (/ (length sequence) 2))))
+
 (defun part1 (input)
   (multiple-value-bind (priorities updates) (parse input)
-    (let ((priorities-lookup (reduce (lambda (lookup value)
-                                       (let ((existing (assoc value lookup)))
-                                         (if existing
-                                             (incf (cdr existing))
-                                             (setf lookup (acons value 1 lookup))))
-                                       lookup)
-                                     priorities
-                                     :initial-value '()
-                                     :key #'cdr)))
+    (let ((priorities-lookup (priorities-lookup priorities)))
       (loop for update in updates
-            when (tree-equal
-                  update
-                  (sort (copy-seq update) (lambda (page1 page2)
-                                 (< (or (cdr (assoc page1 priorities-lookup)) 0)
-                                    (or (cdr (assoc page2 priorities-lookup)) 0)))))
-            sum (nth (floor (/ (length update) 2)) update)))))
+            when (update-acceptable-p update priorities-lookup)
+            sum (middle update)))))
 
 (part1 (uiop:read-file-string #P"input"))
+
+(defun update-sort (update priorities-lookup)
+  (sort update
+        (lambda (page1 page2)
+          (let ((non-acceptable-previous-pages (cdr (assoc page2 priorities-lookup))))
+            (find page1 non-acceptable-previous-pages)))))
+
+(defun part2 (input)
+  (multiple-value-bind (priorities updates) (parse input)
+    (let ((priorities-lookup (priorities-lookup priorities)))
+      (loop for update in updates
+            unless (update-acceptable-p update priorities-lookup)
+            sum (middle (update-sort update priorities-lookup))))))
+
+(part2 (uiop:read-file-string #P"input"))
+    
