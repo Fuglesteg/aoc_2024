@@ -79,16 +79,19 @@
 (defun part2 (input)
   (destructuring-bind (&key obstacles guard width height) (parse input)
     (let ((original-guard (copy-seq guard))
-          (positions (loop until (guard-out-of-bounds-p guard width height)
-                           do (setf guard (guard-move guard obstacles))
-                           collect (getf guard :position))))
+          (positions (remove-duplicates
+                      (loop until (guard-out-of-bounds-p guard width height)
+                            do (setf guard (guard-move guard obstacles))
+                            collect (getf guard :position))
+                      :test #'equal)))
       (loop for position in positions
             do (setf guard (copy-seq original-guard))
             unless (loop until (guard-out-of-bounds-p guard width height)
-                         for ticks from 0
-                         never (> ticks 200)
                          do (setf guard (guard-move guard (append (list position) obstacles)))
+                         when (find guard guard-states :test #'equal)
+                         return nil
+                         collect (copy-seq guard) into guard-states
                          finally (return t))
-            sum 1)))) ; => 2460
+            sum 1))))
 
 (part2 (uiop:read-file-string #P"input"))
