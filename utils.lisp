@@ -46,3 +46,10 @@ if accept-garbage is t we skip over things that are neither collectp or untilp"
 (defun split-string-remove-empties (string &key separator)
   (remove-if #'string-empty-p (uiop:split-string string :separator separator)))
 
+(defun split-string (string separator)
+  (loop for start = (string-find string separator)
+        while start
+        for portion = (subseq string 0 start)
+        do (setf string (subseq string (+ start (length separator))))
+        collect portion into result
+        finally (return (append result (list string)))))
