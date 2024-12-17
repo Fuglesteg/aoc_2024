@@ -57,9 +57,10 @@
   (let ((values (parse input)))
     (loop for (sum . values) in values
           for operation-combinations = (product (list #'+ #'* #'||) :length (1- (length values)))
-          when (find sum (loop for operations in operation-combinations
-                               collect (reduce-pairwise values operations))
-                     :test #'=)
+          when (loop for operations in operation-combinations
+                     when (= sum (reduce-pairwise values operations))
+                     return t
+                     finally (return nil))
           sum sum)))
 
 (part2 (uiop:read-file-string #P"input"))
