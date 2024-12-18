@@ -18,21 +18,9 @@ if accept-garbage is t we skip over things that are neither collectp or untilp"
              :end1 min-length
              :end2 min-length)))
 
-(defun string-find (string needle)
-  "Return the index of needle in string or nil"
-  (let (accumulator)
-    (loop for char across string
-          for i from 0
-          do (setf accumulator (append accumulator (list char)))
-          do (when (not (string~ (coerce accumulator 'string) needle))
-               (setf accumulator (list char)))
-          do (when (string= (coerce accumulator 'string) needle)
-               (return-from string-find (values (- i (1- (length accumulator)))
-                                                (1+ i)))))))
-
 (defun string-occurrences (string needle)
   (let ((occurrences 0))
-    (loop for index = (string-find string needle)
+    (loop for index = (search needle string)
           while index
           do (when index
                (incf occurrences))
@@ -46,8 +34,8 @@ if accept-garbage is t we skip over things that are neither collectp or untilp"
 (defun split-string-remove-empties (string &key separator)
   (remove-if #'string-empty-p (uiop:split-string string :separator separator)))
 
-(defun split-string (string separator)
-  (loop for start = (string-find string separator)
+(defun sequence-split (string separator)
+  (loop for start = (search separator string)
         while start
         for portion = (subseq string 0 start)
         do (setf string (subseq string (+ start (length separator))))

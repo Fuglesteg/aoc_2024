@@ -10,7 +10,7 @@
 292: 11 6 16 20")
 
 (defun parse (input)
-  (loop for line in (remove "" (split-string input (string #\Newline)) :test #'string=)
+  (loop for line in (remove "" (sequence-split input (string #\Newline)) :test #'string=)
         collect (destructuring-bind (sum values) (split-string line ": ")
                   (cons (parse-integer sum)
                         (mapcar #'parse-integer (split-string values " "))))))

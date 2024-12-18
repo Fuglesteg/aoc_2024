@@ -30,7 +30,7 @@
 
 (defun parse (input)
   "Parse the input into a list of cons pairs of priorities and a list of updates"
-  (let* ((section-separator (string-find input (coerce '(#\Newline #\Newline) 'string)))
+  (let* ((section-separator (search (coerce '(#\Newline #\Newline) 'string) input))
          (first-section (subseq input 0 section-separator))
          (second-section (subseq input (+ 2 section-separator))))
     (values (loop for pair in (split-string-remove-empties first-section :separator '(#\Newline))

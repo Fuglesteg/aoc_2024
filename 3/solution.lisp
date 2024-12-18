@@ -31,7 +31,7 @@
 (defun part2 (input)
   (let ((sum 0)
         (eval t))
-    (loop for index = (string-find input (if eval "don't()" "do()"))
+    (loop for index = (search (if eval "don't()" "do()") input)
           do (when eval
                (incf sum (part1 (subseq input 0 index)))
                (unless index
